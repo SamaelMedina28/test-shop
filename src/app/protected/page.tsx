@@ -5,8 +5,12 @@ import { auth } from "@/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { PasswordDashboard } from "./_components/password-dashboard";
+import { getPasswords } from "./services/password";
 
 export default async function ProtectedPage() {
+
+  const passwords = await getPasswords();
+
   const session = await auth();
   const userInitial =
     session?.user?.name?.charAt(0)?.toUpperCase() ??
@@ -64,7 +68,7 @@ export default async function ProtectedPage() {
       </header>
 
       <main className="flex-1 bg-muted/30">
-        <PasswordDashboard />
+        <PasswordDashboard passwords={passwords} />
       </main>
 
       <footer className="border-t">

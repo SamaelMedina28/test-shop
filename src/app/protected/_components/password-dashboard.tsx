@@ -17,8 +17,6 @@ import {
   ShieldCheck,
   Trash2,
 } from "lucide-react";
-
-import { mockPasswords, type PasswordEntry } from "@/lib/passwords-mock";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -50,8 +48,10 @@ import {
 import { AddPasswordDialog } from "./add-password-dialog";
 import { EditPasswordDialog } from "./edit-password-dialog";
 import { ViewPasswordDialog } from "./view-password-dialog";
+import { PasswordEntry } from "@/types/password";
 
-export function PasswordDashboard() {
+export function PasswordDashboard({ passwords }: { passwords: PasswordEntry[] }) {
+
   // Estado solo visual para el front (filtrar el mock y mostrar contraseñas).
   const [query, setQuery] = useState("");
   const [visibleIds, setVisibleIds] = useState<Set<string>>(new Set());
@@ -60,14 +60,14 @@ export function PasswordDashboard() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return mockPasswords;
-    return mockPasswords.filter((p) =>
-      [p.sitio, p.usuario, p.correo, p.comentario]
+    if (!q) return passwords;
+    return passwords.filter((p) =>
+      [p.site, p.username, p.email, p.comments]
         .join(" ")
         .toLowerCase()
         .includes(q),
     );
-  }, [query]);
+  }, [query, passwords]);
 
   function toggleVisible(id: string) {
     setVisibleIds((prev) => {
@@ -92,7 +92,7 @@ export function PasswordDashboard() {
           <p className="mt-2 leading-7 text-muted-foreground">
             Tienes{" "}
             <span className="font-semibold text-foreground">
-              {mockPasswords.length} contraseñas
+              {passwords.length} contraseñas
             </span>{" "}
             guardadas en tu bóveda.
           </p>
@@ -117,7 +117,7 @@ export function PasswordDashboard() {
             <div>
               <CardDescription>Total guardadas</CardDescription>
               <CardTitle className="text-2xl tabular-nums">
-                {mockPasswords.length}
+                {passwords.length}
               </CardTitle>
             </div>
           </CardHeader>
@@ -130,7 +130,7 @@ export function PasswordDashboard() {
             <div>
               <CardDescription>Sitios únicos</CardDescription>
               <CardTitle className="text-2xl tabular-nums">
-                {new Set(mockPasswords.map((p) => p.sitio)).size}
+                {new Set(passwords.map((p) => p.site)).size}
               </CardTitle>
             </div>
           </CardHeader>
@@ -202,21 +202,21 @@ export function PasswordDashboard() {
                       <TableCell>
                         <div className="flex items-center gap-2.5">
                           <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 font-semibold text-primary">
-                            {p.sitio.charAt(0).toUpperCase()}
+                            {p.site.charAt(0).toUpperCase()}
                           </span>
-                          <span className="font-medium">{p.sitio}</span>
+                          <span className="font-medium">{p.site}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {p.usuario}
+                        {p.username}
                       </TableCell>
                       <TableCell className="hidden text-muted-foreground lg:table-cell">
-                        {p.correo}
+                        {p.email}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <code className="min-w-24 text-xs tracking-wider">
-                            {visible ? p.contrasena : "••••••••••"}
+                            {visible ? p.password : "••••••••••"}
                           </code>
                           <Button
                             type="button"
@@ -224,8 +224,8 @@ export function PasswordDashboard() {
                             size="icon-xs"
                             aria-label={
                               visible
-                                ? `Ocultar contraseña de ${p.sitio}`
-                                : `Mostrar contraseña de ${p.sitio}`
+                                ? `Ocultar contraseña de ${p.site}`
+                                : `Mostrar contraseña de ${p.site}`
                             }
                             onClick={() => toggleVisible(p.id)}
                           >
@@ -240,7 +240,7 @@ export function PasswordDashboard() {
                             type="button"
                             variant="ghost"
                             size="icon-xs"
-                            aria-label={`Copiar contraseña de ${p.sitio}`}
+                            aria-label={`Copiar contraseña de ${p.site}`}
                             title="Copiar (pendiente)"
                           >
                             <Copy aria-hidden="true" />
@@ -268,7 +268,7 @@ export function PasswordDashboard() {
                         )}
                       </TableCell>
                       <TableCell className="hidden max-w-56 truncate text-muted-foreground xl:table-cell">
-                        {p.comentario || "—"}
+                        {p.comments || "—"}
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
@@ -278,7 +278,7 @@ export function PasswordDashboard() {
                                 type="button"
                                 variant="ghost"
                                 size="icon-sm"
-                                aria-label={`Acciones para ${p.sitio}`}
+                                aria-label={`Acciones para ${p.site}`}
                               >
                                 <MoreHorizontal aria-hidden="true" />
                               </Button>
@@ -340,7 +340,7 @@ export function PasswordDashboard() {
             <Separator />
             <div className="flex flex-col items-center justify-between gap-3 px-6 py-4 text-sm text-muted-foreground sm:flex-row">
               <p className="tabular-nums">
-                Mostrando {filtered.length} de {mockPasswords.length}
+                Mostrando {filtered.length} de {passwords.length}
               </p>
               {/* Paginación visual (decorativa). */}
               <div className="flex items-center gap-1.5">
