@@ -71,3 +71,17 @@ export const createPassword = async (
         id: newPassword.id,
     };
 };
+
+export const deletePassword = async (id: string) => {
+    const session = await auth();
+    if (!session?.user?.id) {
+        throw new Error("User not authenticated");
+    }
+    await prisma.password.delete({
+        where: {
+            id: id,
+            userId: session.user.id,
+        },
+    });
+    revalidatePath("/protected/");
+};

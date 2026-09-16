@@ -49,6 +49,7 @@ import { AddPasswordDialog } from "./add-password-dialog";
 import { EditPasswordDialog } from "./edit-password-dialog";
 import { ViewPasswordDialog } from "./view-password-dialog";
 import { PasswordEntry } from "@/types/password";
+import { deletePassword } from "../actions/passwords";
 
 export function PasswordDashboard({ passwords }: { passwords: PasswordEntry[] }) {
 
@@ -76,6 +77,16 @@ export function PasswordDashboard({ passwords }: { passwords: PasswordEntry[] })
       else next.add(id);
       return next;
     });
+  }
+
+  async function handleDelete(id: string) {
+    try {
+      const confirmDialog = confirm("¿Estás seguro de que quieres eliminar esta contraseña?");
+      if (!confirmDialog) return;
+      await deletePassword(id);
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+    }
   }
 
   return (
@@ -235,13 +246,15 @@ export function PasswordDashboard({ passwords }: { passwords: PasswordEntry[] })
                               <Eye aria-hidden="true" />
                             )}
                           </Button>
-                          {/* TODO(practica): copiar al portapapeles. */}
                           <Button
                             type="button"
                             variant="ghost"
                             size="icon-xs"
                             aria-label={`Copiar contraseña de ${p.site}`}
-                            title="Copiar (pendiente)"
+                            title="Copiar"
+                            onClick={() => {
+                              navigator.clipboard.writeText(p.password);
+                            }}
                           >
                             <Copy aria-hidden="true" />
                           </Button>
@@ -301,7 +314,7 @@ export function PasswordDashboard({ passwords }: { passwords: PasswordEntry[] })
                               </DropdownMenuItem>
                             </DropdownMenuGroup>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem variant="destructive">
+                            <DropdownMenuItem variant="destructive" onClick={() => handleDelete(p.id)}>
                               <Trash2 aria-hidden="true" />
                               Eliminar
                             </DropdownMenuItem>

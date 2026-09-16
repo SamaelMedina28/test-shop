@@ -94,13 +94,15 @@ export function ViewPasswordDialog({ entry, onClose, onEdit }: Props) {
                 <Eye aria-hidden="true" />
               )}
             </Button>
-            {/* TODO(practica): copiar al portapapeles. */}
             <Button
               type="button"
               variant="ghost"
               size="icon-xs"
               aria-label="Copiar contraseña"
-              title="Copiar (pendiente)"
+              title="Copiar"
+              onClick={() => {
+                navigator.clipboard.writeText(entry.password);
+              }}
             >
               <Copy aria-hidden="true" />
             </Button>
