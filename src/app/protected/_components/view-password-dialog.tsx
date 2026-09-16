@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Copy, ExternalLink, Eye, EyeOff, Pencil } from "lucide-react";
 
-import type { PasswordEntry } from "@/lib/passwords-mock";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,6 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { PasswordEntry } from "@/types/password";
 
 type Props = {
   entry: PasswordEntry;
@@ -52,11 +52,11 @@ export function ViewPasswordDialog({ entry, onClose, onEdit }: Props) {
         <DialogHeader>
           <div className="flex items-center gap-3">
             <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary text-lg font-semibold text-primary-foreground">
-              {entry.sitio.charAt(0).toUpperCase()}
+              {entry.site.charAt(0).toUpperCase()}
             </span>
             <div className="min-w-0">
               <DialogTitle className="truncate text-base">
-                {entry.sitio}
+                {entry.site}
               </DialogTitle>
               <DialogDescription className="truncate">
                 Detalle de la contraseña guardada.
@@ -69,17 +69,17 @@ export function ViewPasswordDialog({ entry, onClose, onEdit }: Props) {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Usuario">
-            <p className="font-medium break-all">{entry.usuario}</p>
+            <p className="font-medium break-all">{entry.username}</p>
           </Field>
           <Field label="Correo">
-            <p className="font-medium break-all">{entry.correo}</p>
+            <p className="font-medium break-all">{entry.email}</p>
           </Field>
         </div>
 
         <Field label="Contraseña">
           <div className="flex items-center gap-1.5 rounded-none border border-input bg-muted/40 px-2.5 py-1.5">
             <code className="flex-1 text-xs tracking-wider break-all">
-              {visible ? entry.contrasena : "••••••••••••"}
+              {visible ? entry.password : "••••••••••••"}
             </code>
             <Button
               type="button"
@@ -125,7 +125,7 @@ export function ViewPasswordDialog({ entry, onClose, onEdit }: Props) {
 
         <Field label="Comentario">
           <p className="leading-6 text-muted-foreground">
-            {entry.comentario || "—"}
+            {entry.comments || "—"}
           </p>
         </Field>
 

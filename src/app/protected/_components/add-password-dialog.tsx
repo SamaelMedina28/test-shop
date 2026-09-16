@@ -39,6 +39,14 @@ const initialState: CreatePasswordState = {
 export function AddPasswordDialog() {
   const [showPassword, setShowPassword] = useState(false);
   const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    site: "",
+    username: "",
+    email: "",
+    password: "",
+    link: "",
+    comments: "",
+  });
 
   const [state, formAction, isPending] = useActionState(
     createPassword,
@@ -95,6 +103,8 @@ export function AddPasswordDialog() {
                 name="site"
                 placeholder="Ej. GitHub"
                 autoComplete="off"
+                onChange={(e) => setFormData({ ...formData, site: e.target.value })}
+                value={formData.site}
               />
 
               {state.errors?.site && (
@@ -114,6 +124,8 @@ export function AddPasswordDialog() {
                 name="username"
                 placeholder="Ej. samael-dev"
                 autoComplete="off"
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                value={formData.username}
               />
 
               {state.errors?.username && (
@@ -135,6 +147,8 @@ export function AddPasswordDialog() {
               type="email"
               placeholder="Ej. samael@correo.com"
               autoComplete="off"
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              value={formData.email}
             />
 
             {state.errors?.email && (
@@ -162,6 +176,8 @@ export function AddPasswordDialog() {
                   placeholder="••••••••••••"
                   autoComplete="new-password"
                   className="pr-10"
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  value={formData.password}
                 />
 
                 <Button
@@ -227,6 +243,8 @@ export function AddPasswordDialog() {
               type="url"
               placeholder="https://..."
               autoComplete="off"
+              onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+              value={formData.link}
             />
 
             {state.errors?.link && (
@@ -246,6 +264,8 @@ export function AddPasswordDialog() {
               name="comments"
               placeholder="Notas sobre esta cuenta..."
               rows={3}
+              onChange={(e) => setFormData({ ...formData, comments: e.target.value })}
+              value={formData.comments}
             />
 
             {state.errors?.comments && (

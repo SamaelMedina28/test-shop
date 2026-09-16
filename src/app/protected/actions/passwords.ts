@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 import * as z from "zod";
 
 const passwordSchema = z.object({
@@ -13,39 +14,43 @@ const passwordSchema = z.object({
     comments: z.string().optional(),
 });
 
+
 export type CreatePasswordState = {
     success: boolean;
+    id?: string;
     message?: string;
     errors?: Record<string, string[] | undefined>;
 };
 
 
-export const createPassword = async (prevData: CreatePasswordState, data: FormData) => {
+export const createPassword = async (
+    prevData: CreatePasswordState,
+    formData: FormData,
+): Promise<CreatePasswordState> => {
     const session = await auth();
     if (!session?.user?.id) {
         throw new Error("User not authenticated");
     }
 
-    // Validate the data using zod
-    const parsedData = passwordSchema.safeParse({
-        site: data.get("site"),
-        username: data.get("username"),
-        email: data.get("email"),
-        password: data.get("password"),
-        link: data.get("link"),
-        comments: data.get("comments"),
-    });
+    const data = {
+        site: formData.get("site")?.toString() ?? "",
+        username: formData.get("username")?.toString() ?? "",
+        email: formData.get("email")?.toString() ?? "",
+        password: formData.get("password")?.toString() ?? "",
+        link: formData.get("link")?.toString() ?? "",
+        comments: formData.get("comments")?.toString() ?? "",
+    };
+
+    const parsedData = passwordSchema.safeParse(data);
 
     if (!parsedData.success) {
         return {
-            data: parsedData.data,
             success: false,
             errors: parsedData.error.flatten().fieldErrors,
         };
     }
 
-    const { site, username, email, password, link, comments } =
-        parsedData.data;
+    const { site, username, email, password, link, comments } = parsedData.data;
 
     const newPassword = await prisma.password.create({
         data: {
@@ -59,8 +64,10 @@ export const createPassword = async (prevData: CreatePasswordState, data: FormDa
         },
     });
 
+    revalidatePath("/protected/");
+
     return {
         success: true,
         id: newPassword.id,
     };
-}
+};
