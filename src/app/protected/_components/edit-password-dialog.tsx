@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Dices, Eye, EyeOff, Pencil, Save } from "lucide-react";
 
-import type { PasswordEntry } from "@/lib/passwords-mock";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,16 +16,29 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PasswordEntry } from "@/types/password";
+import { CreatePasswordState, editPassword } from "@/app/protected/actions/passwords";
 
 type Props = {
   entry: PasswordEntry;
   onClose: () => void;
 };
-
+const initialState: CreatePasswordState = {
+  success: false,
+};
 export function EditPasswordDialog({ entry, onClose }: Props) {
   // Estado solo visual (mostrar / ocultar la contraseña del formulario).
   const [showPassword, setShowPassword] = useState(false);
+  const [state, formAction, isPending] = useActionState(
+    editPassword,
+    initialState
+  );
 
+  useEffect(() => {
+    if (state.success) {
+      onClose();
+    }
+  }, [state.success, onClose]);
   return (
     <Dialog
       open
@@ -40,7 +52,7 @@ export function EditPasswordDialog({ entry, onClose }: Props) {
             <Pencil aria-hidden="true" className="size-5" />
           </span>
           <DialogTitle className="text-base">
-            Editar contraseña de {entry.sitio}
+            Editar contraseña de {entry.site}
           </DialogTitle>
           <DialogDescription>
             Modifica los campos que necesites. Nada se guarda todavía.
@@ -49,35 +61,36 @@ export function EditPasswordDialog({ entry, onClose }: Props) {
 
         {/* TODO(practica): convierte este <form> visual en tu formulario real
             (server action o API route para actualizar la contraseña). */}
-        <form className="grid gap-4" onSubmit={(e) => e.preventDefault()}>
+        <form className="grid gap-4" action={formAction}>
+          <Input type="hidden" name="id" value={entry.id} />
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-1.5">
-              <Label htmlFor={`edit-sitio-${entry.id}`}>Sitio</Label>
+              <Label htmlFor={`edit-site-${entry.id}`}>site</Label>
               <Input
-                id={`edit-sitio-${entry.id}`}
-                name="sitio"
-                defaultValue={entry.sitio}
+                id={`edit-site-${entry.id}`}
+                name="site"
+                defaultValue={entry.site}
                 autoComplete="off"
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor={`edit-usuario-${entry.id}`}>Usuario</Label>
+              <Label htmlFor={`edit-username-${entry.id}`}>Usuario</Label>
               <Input
-                id={`edit-usuario-${entry.id}`}
-                name="usuario"
-                defaultValue={entry.usuario}
+                id={`edit-username-${entry.id}`}
+                name="username"
+                defaultValue={entry.username}
                 autoComplete="off"
               />
             </div>
           </div>
 
           <div className="grid gap-1.5">
-            <Label htmlFor={`edit-correo-${entry.id}`}>Correo</Label>
+            <Label htmlFor={`edit-email-${entry.id}`}>Correo</Label>
             <Input
-              id={`edit-correo-${entry.id}`}
-              name="correo"
+              id={`edit-email-${entry.id}`}
+              name="email"
               type="email"
-              defaultValue={entry.correo}
+              defaultValue={entry.email}
               autoComplete="off"
             />
           </div>
@@ -87,10 +100,10 @@ export function EditPasswordDialog({ entry, onClose }: Props) {
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Input
-                  id={`edit-contrasena-${entry.id}`}
-                  name="contrasena"
+                  id={`edit-password-${entry.id}`}
+                  name="password"
                   type={showPassword ? "text" : "password"}
-                  defaultValue={entry.contrasena}
+                  defaultValue={entry.password}
                   autoComplete="new-password"
                   className="pr-10"
                 />
@@ -130,17 +143,17 @@ export function EditPasswordDialog({ entry, onClose }: Props) {
               id={`edit-link-${entry.id}`}
               name="link"
               type="url"
-              defaultValue={entry.link}
+              defaultValue={entry.link || ""}
               autoComplete="off"
             />
           </div>
 
           <div className="grid gap-1.5">
-            <Label htmlFor={`edit-comentario-${entry.id}`}>Comentario</Label>
+            <Label htmlFor={`edit-comments-${entry.id}`}>Comentario</Label>
             <Textarea
-              id={`edit-comentario-${entry.id}`}
-              name="comentario"
-              defaultValue={entry.comentario}
+              id={`edit-comments-${entry.id}`}
+              name="comments"
+              defaultValue={entry.comments || ""}
               rows={3}
             />
           </div>
@@ -153,10 +166,9 @@ export function EditPasswordDialog({ entry, onClose }: Props) {
                 </Button>
               }
             />
-            {/* TODO(practica): onClick / action para guardar en tu back. */}
-            <Button type="button">
+            <Button type="submit" disabled={isPending}>
               <Save aria-hidden="true" />
-              Guardar cambios
+              {isPending ? "Guardando..." : "Guardar cambios"}
             </Button>
           </DialogFooter>
         </form>

@@ -85,3 +85,57 @@ export const deletePassword = async (id: string) => {
     });
     revalidatePath("/protected/");
 };
+
+
+export const editPassword = async (
+    prevData: CreatePasswordState,
+    formData: FormData,
+): Promise<CreatePasswordState> => {
+    const session = await auth();
+    if (!session?.user?.id) {
+        throw new Error("User not authenticated");
+    }
+    const id = formData.get("id")?.toString() ?? "";
+    const data = {
+        site: formData.get("site")?.toString() ?? "",
+        username: formData.get("username")?.toString() ?? "",
+        email: formData.get("email")?.toString() ?? "",
+        password: formData.get("password")?.toString() ?? "",
+        link: formData.get("link")?.toString() ?? "",
+        comments: formData.get("comments")?.toString() ?? "",
+    };
+
+    const parsedData = passwordSchema.safeParse(data);
+
+    if (!parsedData.success) {
+        return {
+            success: false,
+            errors: parsedData.error.flatten().fieldErrors,
+        };
+    }
+
+    const { site, username, email, password, link, comments } = parsedData.data;
+
+    const editedPassword = await prisma.password.update({
+        where: {
+            id: id,
+            userId: session.user.id,
+        },
+        data: {
+            site,
+            username,
+            email,
+            password,
+            link: link ?? null,
+            comments: comments ?? null,
+            userId: session.user.id,
+        },
+    });
+
+    revalidatePath("/protected/");
+
+    return {
+        success: true,
+        id: editedPassword.id,
+    };
+};
